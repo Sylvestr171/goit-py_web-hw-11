@@ -6,7 +6,7 @@ class Contact(BaseModel):
     last_name: str
     e_mail: EmailStr
     birth_date: date
-    additional_info: str|None = None
+    additional_info: str | None = None
 
 
 class ContactResponse(BaseModel):
