@@ -1,5 +1,8 @@
-from fastapi import  APIRouter
+from fastapi import  APIRouter, Depends, status
+from config.db import get_db
+from src.contacts.repo import ContactReposetory
 from src.contacts.schema import Contact, ContactResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
 
@@ -7,9 +10,13 @@ router = APIRouter()
 async def get_contacts():
     return {"contacts":"all contacts"}
 
-@router.get("/{contact_id}")
-async def get_contact(contact_id: int):
-    return {"contact_id":contact_id}
+@router.get("/{contact_id}", response_model=ContactResponse)
+async def get_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
+    contact_repo = ContactReposetory(db)
+    contact = await contact_repo.get_contact(contact_id)
+    if not contact:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
+    return contact
 
 # @router.post("/contacts")
 # async def create_contact(contact: Contact):
