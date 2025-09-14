@@ -26,3 +26,7 @@ class ContactCreate(Contact):
 
 class ContactUpdate(Contact):
     pass
+
+class ContactDeletedResponse(BaseModel):
+    detail: str
+    contact: ContactResponse
