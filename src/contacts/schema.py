@@ -9,6 +9,15 @@ class Contact(BaseModel):
     additional_info: str | None = None
 
 
-class ContactResponse(BaseModel):
-    first_name: str
-    last_name: str
+class ContactResponse(Contact):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+class ContactCreate(Contact):
+    pass
+
+class ContactUpdate(Contact):
+    pass

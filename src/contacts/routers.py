@@ -1,10 +1,12 @@
-from fastapi import  APIRouter, Depends, status
+from fastapi import  APIRouter, Depends, HTTPException, status
 from config.db import get_db
 from src.contacts.repo import ContactReposetory
-from src.contacts.schema import Contact, ContactResponse
+from src.contacts.schema import Contact, ContactCreate, ContactResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
+
+
 
 @router.get("/all")
 async def get_contacts():
@@ -22,6 +24,7 @@ async def get_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
 # async def create_contact(contact: Contact):
 #     return {"name": (contact.first_name, contact.last_name), "birth day": contact.birth_date}
 
-@router.post("/")
-async def create_contact(contact: Contact) -> ContactResponse:
-    return ContactResponse(first_name=contact.first_name, last_name=contact.last_name)
+@router.post("/", response_model=ContactResponse)
+async def create_contact(contact: ContactCreate, db: AsyncSession = Depends(get_db)):
+    contact_repo = ContactReposetory(db)
+    return await contact_repo.create_contact(contact)
