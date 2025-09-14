@@ -1,3 +1,4 @@
+from pydantic import EmailStr
 from sqlalchemy import select
 
 from src.contacts.models import Contact
@@ -35,3 +36,18 @@ class ContactReposetory:
             await self.session.commit()
             return contact
         return None
+    
+    async def get_contact_first_name(self, first_name: str) -> Contact:
+        query = select(Contact).where(Contact.first_name == first_name)
+        result = await self.session.execute(query)
+        return result.scalars().all()
+    
+    async def get_contact_last_name(self, last_name: str) -> Contact:
+        query = select(Contact).where(Contact.last_name == last_name)
+        result = await self.session.execute(query)
+        return result.scalars().all()
+    
+    async def get_contact_e_mail(self, e_mail: EmailStr) -> Contact:
+        query = select(Contact).where(Contact.e_mail == e_mail)
+        result = await self.session.execute(query)
+        return result.scalars().all()

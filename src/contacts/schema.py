@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 from pydantic import BaseModel, EmailStr, StringConstraints
 from datetime import date
 
@@ -25,7 +25,12 @@ class ContactCreate(Contact):
     pass
 
 class ContactUpdate(Contact):
-    pass
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    e_mail: Optional[EmailStr] = None
+    phone: Optional[PhoneStr] = None
+    birth_date: Optional[date] = None
+    additional_info: Optional[str] = None
 
 class ContactDeletedResponse(BaseModel):
     detail: str
