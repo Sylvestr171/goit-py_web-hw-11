@@ -14,6 +14,12 @@ class ContactReposetory:
         return result.scalar_one_or_none()
     
 
+    async def get_all_contact(self) -> Contact:
+        query = select(Contact)
+        result = await self.session.execute(query)
+        return result.scalars().all()
+    
+
     async def create_contact(self, contact: ContactCreate) -> Contact:
         new_contact = Contact(**contact.model_dump())
         self.session.add(new_contact)

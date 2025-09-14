@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import  APIRouter, Depends, HTTPException, status
 from config.db import get_db
 from src.contacts.repo import ContactReposetory
@@ -8,9 +9,10 @@ router = APIRouter()
 
 
 
-@router.get("/all")
-async def get_contacts():
-    return {"contacts":"all contacts"}
+@router.get("/all", response_model=List[ContactResponse])
+async def get_all_contacts(db: AsyncSession = Depends(get_db)):
+    contact_repo = ContactReposetory(db)
+    return await contact_repo.get_all_contact()
 
 @router.get("/{contact_id}", response_model=ContactResponse)
 async def get_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
