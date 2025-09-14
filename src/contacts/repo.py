@@ -9,7 +9,7 @@ class ContactReposetory:
         self.session = session
 
     async def get_contact(self, contact_id: int) -> Contact:
-        query = select(Contact).where(contact_id == contact_id)
+        query = select(Contact).where(Contact.id == contact_id)
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
     
