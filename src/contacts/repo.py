@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 from pydantic import EmailStr
 from sqlalchemy import select
 
@@ -51,3 +52,16 @@ class ContactReposetory:
         query = select(Contact).where(Contact.e_mail == e_mail)
         result = await self.session.execute(query)
         return result.scalars().all()
+    
+    async def get_birthdays_next_7_days(self) -> list[Contact]:
+        today = date.today()
+        upcoming_days = {(today + timedelta(days=i)).strftime("%m-%d") for i in range(7)}
+
+        contacts = await self.get_all_contact()
+
+        upcoming_birthdays = [
+            contact for contact in contacts
+            if contact.birth_date.strftime("%m-%d") in upcoming_days
+        ]
+
+        return upcoming_birthdays

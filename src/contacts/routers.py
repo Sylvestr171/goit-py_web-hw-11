@@ -18,6 +18,14 @@ async def get_all_contacts(db: AsyncSession = Depends(get_db)):
     contact_repo = ContactReposetory(db)
     return await contact_repo.get_all_contact()
 
+@router.get("/birthday_in_week", response_model=List[ContactResponse])
+async def get_birthdays_next_7_days(db: AsyncSession = Depends(get_db)):
+    contact_repo = ContactReposetory(db)
+    contact = await contact_repo.get_birthdays_next_7_days()
+    if not contact:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
+    return contact
+
 @router.get("/{contact_id}", response_model=ContactResponse)
 async def get_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
     contact_repo = ContactReposetory(db)
@@ -30,7 +38,7 @@ async def get_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
 async def update_contact_partial(contact_id: int, contact_update: ContactUpdate, db: AsyncSession = Depends(get_db)):
     contact_repo = ContactReposetory(db)
     existing_contact = await contact_repo.get_contact(contact_id)
-    
+
     if not existing_contact:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
 
