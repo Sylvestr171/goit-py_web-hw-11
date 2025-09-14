@@ -3,7 +3,7 @@ from fastapi import  APIRouter, Depends, HTTPException, status
 from pydantic import EmailStr
 from config.db import get_db
 from src.contacts.repo import ContactReposetory
-from src.contacts.schema import Contact, ContactCreate, ContactDeletedResponse, ContactResponse, ContactUpdate
+from src.contacts.schema import ContactCreate, ContactDeletedResponse, ContactResponse, ContactUpdate
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
