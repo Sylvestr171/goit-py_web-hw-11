@@ -10,15 +10,15 @@ class ContactReposetory:
     def __init__(self, session):
         self.session = session
 
-    async def create_contact(self, contact: ContactCreate) -> Contact:
-        new_contact = Contact(**contact.model_dump())
+    async def create_contact(self, contact: ContactCreate, owner_id: int) -> Contact:
+        new_contact = Contact(**contact.model_dump(), owner_id=owner_id)
         self.session.add(new_contact)
         await self.session.commit()
         await self.session.refresh(new_contact)
         return new_contact    
     
-    async def get_all_contact(self) -> Contact:
-        query = select(Contact)
+    async def get_all_contact(self, owner_id) -> Contact:
+        query = select(Contact).where(Contact.owner_id == owner_id)
         result = await self.session.execute(query)
         return result.scalars().all()
     

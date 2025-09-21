@@ -2,6 +2,8 @@ from typing import List
 from fastapi import  APIRouter, Depends, HTTPException, status
 from pydantic import EmailStr
 from config.db import get_db
+from src.auth.models import User
+from src.auth.utils import get_current_user
 from src.contacts.repo import ContactReposetory
 from src.contacts.schema import ContactCreate, ContactDeletedResponse, ContactResponse, ContactUpdate
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,14 +11,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 router = APIRouter()
 
 @router.post("/", response_model=ContactResponse)
-async def create_contact(contact: ContactCreate, db: AsyncSession = Depends(get_db)):
+async def create_contact(
+    contact: ContactCreate,
+    user: User = Depends(get_current_user), 
+    db: AsyncSession = Depends(get_db)
+):
     contact_repo = ContactReposetory(db)
-    return await contact_repo.create_contact(contact)
+    return await contact_repo.create_contact(contact, user.id)
 
 @router.get("/all", response_model=List[ContactResponse])
-async def get_all_contacts(db: AsyncSession = Depends(get_db)):
+async def get_all_contacts(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     contact_repo = ContactReposetory(db)
-    return await contact_repo.get_all_contact()
+    return await contact_repo.get_all_contact(user.id)
 
 @router.get("/birthday_in_week", response_model=List[ContactResponse])
 async def get_birthdays_next_7_days(db: AsyncSession = Depends(get_db)):

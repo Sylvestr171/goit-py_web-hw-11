@@ -1,9 +1,17 @@
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from config.db import get_db
 from config.general import settings
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 from typing import Union
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.auth.models import User
+from src.auth.repo import UserRepository
 from src.auth.schema import TokenData
+
+oauth2_schema = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None) -> str:
     to_encode = data.copy()
@@ -40,3 +48,22 @@ def decode_token(token: str):
         return TokenData(username=username)
     except JWTError:
         return None
+    
+
+async def get_current_user(
+        token: str = Depends(oauth2_schema), 
+        db: AsyncSession = Depends(get_db)
+) -> User:
+    credentials_exception = HTTPException(
+        status_code = status.HTTP_401_UNAUTHORIZED, 
+        detail = "Could not validate credentials",
+        headers = {"WWW-Authenticate": "Bearer"},
+    )
+    token_data = decode_token(token)
+    if token_data is None:
+        raise credentials_exception
+    user_repo = UserRepository(db)
+    user = await user_repo.get_user_by_username(token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
