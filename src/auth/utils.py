@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.models import User
 from src.auth.repo import UserRepository
-from src.auth.schema import TokenData
+from src.auth.schema import RoleEnum, TokenData
 
 oauth2_schema = OAuth2PasswordBearer(tokenUrl="auth/token")
 
@@ -67,3 +67,20 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+
+class RoleChecker:
+    def __init__(self, allowed_roles: list[RoleEnum]):
+        self.allowed_roles = allowed_roles
+
+    async def __call__(
+            self, token: str = Depends(oauth2_schema), db: AsyncSession = Depends(get_db)
+    ) -> User:
+        user = await get_current_user(token, db)
+
+        if user.role.name not in[role.value for role in self.allowed_roles]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to prefermthis action",
+            )
+        return user

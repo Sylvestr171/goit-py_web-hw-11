@@ -1,9 +1,9 @@
 from pydantic import EmailStr
 from sqlalchemy import select
 
-from src.auth.models import User
+from src.auth.models import Role, User
 from src.auth.pass_utils import get_password_hash
-from src.auth.schema import UserCreate
+from src.auth.schema import RoleEnum, UserCreate
 
 class UserRepository:
 
@@ -13,10 +13,12 @@ class UserRepository:
 
     async def create_user(self, user_create: UserCreate):
         hash_password = get_password_hash (user_create.password)
+        user_role = await UserRepository(self.session).get_role_by_name(RoleEnum.USER)
         new_user = User(
             username = user_create.username,
             hashed_password = hash_password,
             email = user_create.email,
+            role_id = user_role.id,
         )
         self.session.add(new_user)
         await self.session.commit()
@@ -32,3 +34,9 @@ class UserRepository:
         query = select(User).where(User.username == username)
         resalt = await self.session.execute(query)
         return resalt.scalar_one_or_none()
+    
+
+    async def get_role_by_name(self, name: RoleEnum):
+        query = select(Role).where(Role.name == name.value)
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
