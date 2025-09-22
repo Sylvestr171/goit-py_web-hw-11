@@ -17,7 +17,7 @@ class ContactReposetory:
         await self.session.refresh(new_contact)
         return new_contact    
     
-    async def get_all_contact(self, owner_id) -> Contact:
+    async def get_all_contact(self, owner_id) -> list[Contact]:
         query = select(Contact).where(Contact.owner_id == owner_id)
         result = await self.session.execute(query)
         return result.scalars().all()
@@ -53,11 +53,11 @@ class ContactReposetory:
         result = await self.session.execute(query)
         return result.scalars().all()
     
-    async def get_birthdays_next_7_days(self) -> list[Contact]:
+    async def get_birthdays_next_7_days(self, owner_id) -> list[Contact]:
         today = date.today()
         upcoming_days = {(today + timedelta(days=i)).strftime("%m-%d") for i in range(7)}
 
-        contacts = await self.get_all_contact()
+        contacts = await self.get_all_contact(owner_id)
 
         upcoming_birthdays = [
             contact for contact in contacts

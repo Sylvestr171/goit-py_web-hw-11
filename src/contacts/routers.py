@@ -28,9 +28,12 @@ async def get_all_contacts(
     return await contact_repo.get_all_contact(user.id)
 
 @router.get("/birthday_in_week", response_model=List[ContactResponse])
-async def get_birthdays_next_7_days(db: AsyncSession = Depends(get_db)):
+async def get_birthdays_next_7_days(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     contact_repo = ContactReposetory(db)
-    contact = await contact_repo.get_birthdays_next_7_days()
+    contact = await contact_repo.get_birthdays_next_7_days(user.id)
     if not contact:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
     return contact
