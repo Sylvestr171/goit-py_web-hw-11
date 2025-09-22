@@ -40,17 +40,26 @@ async def get_birthdays_next_7_days(
     return contact
 
 @router.get("/{contact_id}", response_model=ContactResponse)
-async def get_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
+async def get_contact(
+    contact_id: int, 
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     contact_repo = ContactReposetory(db)
-    contact = await contact_repo.get_contact(contact_id)
+    contact = await contact_repo.get_contact(contact_id, user.id)
     if not contact:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
     return contact
 
 @router.patch("/{contact_id}", response_model=ContactResponse)
-async def update_contact_partial(contact_id: int, contact_update: ContactUpdate, db: AsyncSession = Depends(get_db)):
+async def update_contact_partial(
+    contact_id: int, 
+    contact_update: ContactUpdate, 
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     contact_repo = ContactReposetory(db)
-    existing_contact = await contact_repo.get_contact(contact_id)
+    existing_contact = await contact_repo.get_contact(contact_id, user.id)
 
     if not existing_contact:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
@@ -65,9 +74,13 @@ async def update_contact_partial(contact_id: int, contact_update: ContactUpdate,
     return existing_contact
 
 @router.delete("/{contact_id}", response_model=ContactDeletedResponse)
-async def delete_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_contact(
+    contact_id: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     contact_repo = ContactReposetory(db)
-    contact = await contact_repo.delete_contact(contact_id)
+    contact = await contact_repo.delete_contact(contact_id, user.id)
     if not contact:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
     return {
@@ -76,25 +89,25 @@ async def delete_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
             }
 
 @router.get("/first_name/{firs_name}", response_model=List[ContactResponse])
-async def get_contact_first_name(firs_name: str, db: AsyncSession = Depends(get_db)):
+async def get_contact_first_name(firs_name: str, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     contact_repo = ContactReposetory(db)
-    contact = await contact_repo.get_contact_first_name(firs_name)
+    contact = await contact_repo.get_contact_first_name(firs_name, user.id)
     if not contact:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
     return contact
 
 @router.get("/last_name/{last_name}", response_model=List[ContactResponse])
-async def get_contact_last_name(last_name: str, db: AsyncSession = Depends(get_db)):
+async def get_contact_last_name(last_name: str, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     contact_repo = ContactReposetory(db)
-    contact = await contact_repo.get_contact_last_name(last_name)
+    contact = await contact_repo.get_contact_last_name(last_name, user.id)
     if not contact:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
     return contact
 
 @router.get("/e_mail/{e_mail}", response_model=List[ContactResponse])
-async def get_contact_e_mail(e_mail: EmailStr, db: AsyncSession = Depends(get_db)):
+async def get_contact_e_mail(e_mail: EmailStr, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     contact_repo = ContactReposetory(db)
-    contact = await contact_repo.get_contact_e_mail(e_mail)
+    contact = await contact_repo.get_contact_e_mail(e_mail, user.id)
     if not contact:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
     return contact
